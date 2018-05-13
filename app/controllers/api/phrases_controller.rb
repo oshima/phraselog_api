@@ -8,8 +8,8 @@ class Api::PhrasesController < ApplicationController
   def index
     phrases = Phrase.includes(:likes, :user)
       .order(created_at: :desc)
-      .offset(16 * (@page - 1)).
-      limit(16)
+      .offset(16 * (@page - 1))
+      .limit(16)
     render json: phrases.to_json(
       only: [:id_string, :title, :interval, :created_at, :updated_at],
       methods: [:likes_count],
