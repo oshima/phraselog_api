@@ -55,5 +55,5 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
-  config.firebase_project_id = 'oshima-test'
+  config.firebase_project_id = 'phraselog'
 end
