@@ -16,11 +16,4 @@ RUN apk --no-cache --virtual .gem-builddeps add \
 
 COPY . .
 
-ARG RAILS_ENV
-ARG SECRET_KEY_BASE
-ARG DATABASE_URL
-
-RUN rails db:create \
- && rails db:migrate
-
-CMD ["rails", "server"]
+CMD ["rails", "server", "-e", "production"]
