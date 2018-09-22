@@ -34,21 +34,15 @@ module Auth
     end
 
     def verify_id_token(id_token)
-      # Try to read from cache
-      id_token_sha256 = Digest::SHA256.hexdigest(id_token)
-      id_string = Rails.cache.read(id_token_sha256)
-      return id_string if id_string
-
       # Decode (don't verify)
       payload, headers = JWT.decode(id_token, nil, false)
 
-      # Fetch public key corresponding to private key used for signature
-      public_keys = fetch_public_keys
-      unless public_keys.has_key?(headers['kid'])
+      # Specify the public key corresponding to the private key used for signature
+      public_key = fetch_public_keys[headers['kid']]
+      if public_key.blank?
         Rails.logger.info("JWT headers have no or invalid 'kid'")
         return nil
       end
-      public_key = public_keys[headers['kid']]
 
       # Decode again to verify
       payload, headers = JWT.decode(
@@ -57,16 +51,13 @@ module Auth
         true,
         JWT_VERIFY_OPTIONS
       )
-      if payload['sub'].blank?
+
+      # Extract user id (id_string)
+      id_string = payload['sub']
+      if id_string.blank?
         Rails.logger.info("JWT payload has no or invalid 'sub'")
         return nil
       end
-
-      # Write to cache
-      id_string = payload['sub']
-      expires_in = payload['exp'].to_i - Time.now.to_i
-      Rails.cache.write(id_token_sha256, id_string, expires_in: expires_in)
-
       id_string
     rescue JWT::DecodeError => e
       Rails.logger.info(e)
